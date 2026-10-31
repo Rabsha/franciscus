@@ -65,6 +65,31 @@
     $('[data-split]').not('.hero__line').each(function () { splitWords(this); });
     $('[data-words]').each(function () { splitWords(this); });
 
+    /* ---------- Availability months ---------- */
+    function renderAvailability() {
+        const tpl = document.getElementById('month-card');
+        const $grid = $('.month-grid');
+        if (!tpl || !$grid.length) return;
+
+        const labels = { available: 'Available', limited: 'Limited', booked: 'Booked' };
+        const overrides = window.SITE.availability || {};
+        const now = new Date();
+
+        for (let i = 0; i < 6; i++) {
+            const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+            const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+            const status = labels[overrides[key]] ? overrides[key] : 'available';
+            const $card = $(tpl.content.firstElementChild.cloneNode(true));
+
+            $card.addClass(`is-${status}`);
+            $card.find('.month-year').text(d.getFullYear());
+            $card.find('.month-name').text(d.toLocaleString('en', { month: 'short' }));
+            $card.find('.month-status').text(labels[status]);
+            $grid.append($card);
+        }
+    }
+    renderAvailability();
+
     /* ---------- Initial states ---------- */
     if (!reduceMotion) {
         gsap.set('.hero__line .char', { yPercent: 115 });
@@ -228,6 +253,12 @@
             scrollTrigger: { trigger: '.services-list', start: 'top 85%' },
         });
 
+        // Booking process steps
+        gsap.from('.process-step', {
+            y: 50, autoAlpha: 0, duration: 1.1, ease: 'expo.out', stagger: 0.12,
+            scrollTrigger: { trigger: '.process', start: 'top 85%' },
+        });
+
         // Month cards
         gsap.from('.month-card', {
             y: 40, autoAlpha: 0, duration: 1, ease: 'expo.out', stagger: 0.08,
@@ -357,26 +388,43 @@
         });
     }
 
-    /* ---------- Service hover preview ---------- */
-    function initServicePreview() {
-        if (!finePointer || reduceMotion) return;
-        const $preview = $('.service-preview');
-        const $img = $preview.find('img');
-        gsap.set($preview[0], { xPercent: -50, yPercent: -50, scale: 0.7 });
-        const xTo = gsap.quickTo($preview[0], 'x', { duration: 0.6, ease: 'power3' });
-        const yTo = gsap.quickTo($preview[0], 'y', { duration: 0.6, ease: 'power3' });
+    /* ---------- Services accordion + image stage ---------- */
+    function initServices() {
+        const $rows = $('.service-row');
+        const $stageImgs = $('.service-stage img');
+        const total = String($rows.length).padStart(2, '0');
+        let refreshTimer;
 
-        $('.service-row')
-            .on('mouseenter', function () {
-                $img.attr('src', $(this).data('img'));
-                $preview.addClass('is-visible');
-                gsap.to($preview[0], { scale: 1, rotate: gsap.utils.random(-6, 6), duration: 0.6, ease: 'expo.out' });
-            })
-            .on('mouseleave', () => {
-                $preview.removeClass('is-visible');
-                gsap.to($preview[0], { scale: 0.7, duration: 0.4 });
-            })
-            .on('mousemove', (e) => { xTo(e.clientX); yTo(e.clientY); });
+        function showStage(i) {
+            $stageImgs.removeClass('is-active').filter(`[data-index="${i}"]`).addClass('is-active');
+            $('.service-stage__title').text($rows.eq(i).find('.service-title').text());
+            $('.service-stage__count').text(`${String(i + 1).padStart(2, '0')} / ${total}`);
+        }
+
+        $('.service-head').on('click', function () {
+            const $row = $(this).closest('.service-row');
+            const opening = !$row.hasClass('is-active');
+
+            $rows.removeClass('is-active').find('.service-head').attr('aria-expanded', 'false');
+            if (opening) {
+                $row.addClass('is-active');
+                $(this).attr('aria-expanded', 'true');
+                showStage($row.data('index'));
+            }
+
+            // Section height changed — recalc triggers below it once the animation ends.
+            clearTimeout(refreshTimer);
+            refreshTimer = setTimeout(() => ScrollTrigger.refresh(), 850);
+        });
+
+        // Desktop: hovering a row previews its image; leaving returns to the open one.
+        if (finePointer) {
+            $rows.on('mouseenter', function () { showStage($(this).data('index')); });
+            $('.services-list').on('mouseleave', () => {
+                const $open = $rows.filter('.is-active');
+                if ($open.length) showStage($open.data('index'));
+            });
+        }
     }
 
     /* ---------- Gallery filter ---------- */
@@ -502,8 +550,10 @@
         const win = window.open(url, '_blank');
         if (!win) window.location.href = url;
 
-        // Keep a copy of the enquiry on the server.
-        $.ajax({ url: 'contact.php', method: 'POST', data, dataType: 'json' }).catch(() => {});
+        // Keep a copy of the enquiry on the server (not available on static hosting).
+        if (window.SITE.contactEndpoint) {
+            $.ajax({ url: window.SITE.contactEndpoint, method: 'POST', data, dataType: 'json' }).catch(() => {});
+        }
 
         $status.removeClass('is-error').addClass('is-ok').text('Thank you! WhatsApp has opened with your message — just press send.');
         this.reset();
@@ -525,6 +575,6 @@
     initScrollAnimations();
     initHeader();
     initCursor();
-    initServicePreview();
+    initServices();
     runPreloader();
 })(jQuery);

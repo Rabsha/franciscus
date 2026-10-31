@@ -73,30 +73,52 @@ $series = [
 ];
 
 $services = [
-    ['title' => 'Editorial',   'desc' => 'Magazine stories and concept shoots with a strong narrative.', 'img' => 'fc-02.jpg'],
-    ['title' => 'Commercial',  'desc' => 'Brand lookbooks, e-commerce and catalogue work.',               'img' => 'fc-21.jpg'],
-    ['title' => 'Campaign',    'desc' => 'Fashion and lifestyle campaigns for print and digital.',        'img' => 'fc-28.jpg'],
-    ['title' => 'Swim & Fit',  'desc' => 'Swimwear, underwear and athletic brand shoots.',                'img' => 'fc-05.jpg'],
-    ['title' => 'Runway',      'desc' => 'Fashion week shows, presentations and showrooms.',              'img' => 'fc-24.jpg'],
+    [
+        'title' => 'Editorial',
+        'desc'  => 'Magazine stories and concept shoots with a strong narrative. Comfortable with experimental styling, movement and mood-driven direction.',
+        'tags'  => ['Magazines', 'Concept shoots', 'Black & white', 'Beauty'],
+        'img'   => 'fc-25.jpg',
+    ],
+    [
+        'title' => 'Commercial',
+        'desc'  => 'Clean, natural and on-brand. Lookbooks, e-commerce and catalogue days with fast turnarounds and a consistent look.',
+        'tags'  => ['Lookbooks', 'E-commerce', 'Catalogue', 'Social content'],
+        'img'   => 'fc-21.jpg',
+    ],
+    [
+        'title' => 'Campaign',
+        'desc'  => 'Fashion and lifestyle campaigns for print, digital and out-of-home. Brings character to a story while keeping the product front and centre.',
+        'tags'  => ['Print', 'Digital', 'Out-of-home', 'Video'],
+        'img'   => 'fc-28.jpg',
+    ],
+    [
+        'title' => 'Swim & Fit',
+        'desc'  => 'Swimwear, underwear and athletic brand shoots. Trained physique, at ease on location from beaches to the studio.',
+        'tags'  => ['Swimwear', 'Underwear', 'Sportswear', 'Fitness'],
+        'img'   => 'fc-05.jpg',
+    ],
+    [
+        'title' => 'Runway',
+        'desc'  => 'Fashion week shows, presentations and showrooms. Strong walk, quick fittings and calm under backstage pressure.',
+        'tags'  => ['Fashion week', 'Presentations', 'Showroom', 'Fittings'],
+        'img'   => 'fc-24.jpg',
+    ],
 ];
 
-// Availability for the next months. Keys are 'Y-m'; anything not listed is 'available'.
+$process = [
+    ['title' => 'Enquiry',      'desc' => 'Send the brief, dates and location through the form or WhatsApp.'],
+    ['title' => 'Option',       'desc' => 'Your date is held on option while details are being finalised.'],
+    ['title' => 'Confirmation', 'desc' => 'Rate, usage and call sheet are agreed and the booking is confirmed.'],
+    ['title' => 'Shoot day',    'desc' => 'On time, prepared and ready to create — on set or on location.'],
+];
+
+// Availability. Keys are 'YYYY-MM'; any month not listed shows as 'available'.
 // Status: available | limited | booked
-$availabilityOverrides = [
-    date('Y-m', strtotime('first day of +1 month')) => 'limited',
-    date('Y-m', strtotime('first day of +3 months')) => 'booked',
+// The page shows the next 6 months from the visitor's current date (rendered in main.js).
+$availability = [
+    '2026-11' => 'limited',
+    '2027-01' => 'booked',
 ];
-
-$availability = [];
-for ($i = 0; $i < 6; $i++) {
-    $ts  = strtotime("first day of +$i months");
-    $key = date('Y-m', $ts);
-    $availability[] = [
-        'month'  => date('M', $ts),
-        'year'   => date('Y', $ts),
-        'status' => $availabilityOverrides[$key] ?? 'available',
-    ];
-}
 
 $locations = ['Amsterdam', 'Rotterdam', 'Paris', 'Milan', 'London', 'Worldwide travel'];
 

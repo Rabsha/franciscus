@@ -4,7 +4,8 @@ require __DIR__ . '/includes/icons.php';
 $img = 'assets/img/';
 $nav = ['about' => 'About', 'portfolio' => 'Portfolio', 'series' => 'Series', 'availability' => 'Availability', 'contact' => 'Contact'];
 $filters = ['all' => 'All', 'editorial' => 'Editorial', 'fashion' => 'Fashion', 'portrait' => 'Portrait', 'swim' => 'Swim'];
-$statusLabel = ['available' => 'Available', 'limited' => 'Limited', 'booked' => 'Booked'];
+// build.php defines STATIC_BUILD when exporting to plain HTML (e.g. for Vercel, which has no PHP).
+$isStatic = defined('STATIC_BUILD');
 ?>
 <!doctype html>
 <html lang="en">
@@ -298,20 +299,64 @@ $statusLabel = ['available' => 'Available', 'limited' => 'Limited', 'booked' => 
                 </div>
                 <p class="max-w-sm text-sm text-mute" data-reveal>From concept editorials to commercial campaigns — every booking gets the same focus and professionalism.</p>
             </div>
-            <ul class="services-list border-t border-white/10">
-                <?php foreach ($services as $i => $s): ?>
-                    <li class="service-row" data-img="<?= $img . $s['img'] ?>">
-                        <a href="#contact" class="js-scroll grid grid-cols-[auto_1fr] items-center gap-5 py-7 md:grid-cols-[80px_1fr_1fr_auto] md:gap-8 md:py-10">
-                            <span class="text-xs text-sand">0<?= $i + 1 ?></span>
-                            <span class="service-title font-display text-4xl md:text-7xl"><?= e($s['title']) ?></span>
-                            <span class="col-span-2 text-sm text-mute md:col-span-1"><?= e($s['desc']) ?></span>
-                            <span class="service-arrow hidden md:flex"><?= icon('arrow', 'w-5 h-5') ?></span>
-                        </a>
-                    </li>
-                <?php endforeach; ?>
-            </ul>
+            <div class="grid gap-12 lg:grid-cols-12 lg:gap-16">
+                <ul class="services-list border-t border-white/10 lg:col-span-7">
+                    <?php foreach ($services as $i => $s): $open = $i === 0; ?>
+                        <li class="service-row<?= $open ? ' is-active' : '' ?>" data-index="<?= $i ?>">
+                            <button type="button" class="service-head grid w-full grid-cols-[2.5rem_1fr_auto] items-center gap-3 py-6 text-left md:grid-cols-[4rem_1fr_auto] md:py-8" aria-expanded="<?= $open ? 'true' : 'false' ?>" aria-controls="service-<?= $i ?>">
+                                <span class="text-xs text-sand">0<?= $i + 1 ?></span>
+                                <span class="service-title font-display text-[11vw] leading-none sm:text-6xl xl:text-7xl"><?= e($s['title']) ?></span>
+                                <span class="service-arrow"><?= icon('arrow', 'w-5 h-5') ?></span>
+                            </button>
+                            <div class="service-body" id="service-<?= $i ?>">
+                                <div>
+                                    <div class="pb-8 md:pl-[4rem] md:pr-20">
+                                        <div class="mb-6 aspect-[4/3] overflow-hidden rounded-sm lg:hidden">
+                                            <img src="<?= $img . $s['img'] ?>" alt="<?= e($site['first']) ?> — <?= e($s['title']) ?> work" loading="lazy" class="h-full w-full object-cover object-[50%_15%]">
+                                        </div>
+                                        <p class="max-w-xl text-[15px] leading-relaxed text-bone/70"><?= e($s['desc']) ?></p>
+                                        <ul class="mt-5 flex flex-wrap gap-2">
+                                            <?php foreach ($s['tags'] as $t): ?>
+                                                <li class="chip"><?= e($t) ?></li>
+                                            <?php endforeach; ?>
+                                        </ul>
+                                        <a href="#contact" class="js-scroll mt-7 inline-flex items-center gap-2 text-[12px] uppercase tracking-[0.2em] text-sand hover:text-bone">Book for <?= e(strtolower($s['title'])) ?> <?= icon('arrow', 'w-4 h-4') ?></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+
+                <div class="hidden lg:col-span-5 lg:block">
+                    <div class="service-stage sticky top-28 aspect-[4/5] overflow-hidden rounded-sm">
+                        <?php foreach ($services as $i => $s): ?>
+                            <img src="<?= $img . $s['img'] ?>" alt="" aria-hidden="true" loading="lazy" class="<?= $i === 0 ? 'is-active' : '' ?>" data-index="<?= $i ?>">
+                        <?php endforeach; ?>
+                        <div class="service-stage__cap">
+                            <span class="service-stage__title font-display text-4xl"><?= e($services[0]['title']) ?></span>
+                            <span class="service-stage__count text-[11px] uppercase tracking-[0.3em] text-bone/70">01 / 0<?= count($services) ?></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-24 md:mt-32">
+                <div class="mb-10 flex items-end justify-between gap-6">
+                    <h3 class="font-display text-4xl md:text-6xl" data-split>How booking <em class="text-sand">works</em></h3>
+                    <a href="#contact" class="js-scroll btn-pill magnetic hidden md:inline-flex"><span>Start a booking</span><?= icon('arrow', 'w-4 h-4') ?></a>
+                </div>
+                <ol class="process grid border-t border-white/10 sm:grid-cols-2 lg:grid-cols-4">
+                    <?php foreach ($process as $i => $p): ?>
+                        <li class="process-step">
+                            <span class="process-step__no font-display">0<?= $i + 1 ?></span>
+                            <h4 class="mt-6 font-display text-3xl"><?= e($p['title']) ?></h4>
+                            <p class="mt-3 text-sm leading-relaxed text-mute"><?= e($p['desc']) ?></p>
+                        </li>
+                    <?php endforeach; ?>
+                </ol>
+            </div>
         </div>
-        <div class="service-preview" aria-hidden="true"><img src="" alt=""></div>
     </section>
 
     <!-- AVAILABILITY -->
@@ -322,18 +367,18 @@ $statusLabel = ['available' => 'Available', 'limited' => 'Limited', 'booked' => 
                 <h2 class="section-title font-display mt-5" data-split>Open for <em class="text-sand">bookings</em></h2>
                 <p class="mt-6 max-w-lg text-[15px] leading-relaxed text-bone/70" data-reveal>Check the upcoming months below. Dates fill up quickly during fashion weeks — send an option request early and it will be confirmed within 24 hours.</p>
 
-                <div class="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                    <?php foreach ($availability as $a): ?>
-                        <div class="month-card is-<?= $a['status'] ?>">
-                            <div class="flex items-center justify-between">
-                                <span class="text-[11px] uppercase tracking-[0.3em] text-mute"><?= $a['year'] ?></span>
-                                <span class="dot"></span>
-                            </div>
-                            <div class="mt-6 font-display text-4xl md:text-5xl"><?= $a['month'] ?></div>
-                            <div class="month-status mt-1 text-[11px] uppercase tracking-[0.25em]"><?= $statusLabel[$a['status']] ?></div>
+                <!-- Month cards are generated in main.js from SITE.availability, starting at the current month. -->
+                <div class="month-grid mt-12 grid grid-cols-2 gap-3 sm:grid-cols-3"></div>
+                <template id="month-card">
+                    <div class="month-card">
+                        <div class="flex items-center justify-between">
+                            <span class="month-year text-[11px] uppercase tracking-[0.3em] text-mute"></span>
+                            <span class="dot"></span>
                         </div>
-                    <?php endforeach; ?>
-                </div>
+                        <div class="month-name mt-6 font-display text-4xl md:text-5xl"></div>
+                        <div class="month-status mt-1 text-[11px] uppercase tracking-[0.25em]"></div>
+                    </div>
+                </template>
 
                 <div class="mt-6 flex flex-wrap gap-5 text-[11px] uppercase tracking-[0.25em] text-mute" data-reveal>
                     <span class="legend is-available"><span class="dot"></span>Available</span>
@@ -464,7 +509,12 @@ $statusLabel = ['available' => 'Available', 'limited' => 'Limited', 'booked' => 
     <button class="lightbox__nav lightbox__next" aria-label="Next image"><?= icon('next', 'w-6 h-6') ?></button>
 </div>
 
-<script>window.SITE = <?= json_encode(['whatsapp' => $site['whatsapp'], 'name' => $site['first']]) ?>;</script>
+<script>window.SITE = <?= json_encode([
+    'whatsapp'        => $site['whatsapp'],
+    'name'            => $site['first'],
+    'availability'    => (object) $availability,
+    'contactEndpoint' => $isStatic ? null : 'contact.php',
+]) ?>;</script>
 <script src="https://code.jquery.com/jquery-4.0.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
