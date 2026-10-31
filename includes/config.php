@@ -10,7 +10,7 @@ $site = [
     'last'      => 'Cornelis',
     'role'      => 'Model',
     'base'      => 'Amsterdam, Holland',
-    'email'     => 'bookings@franciscuscornelis.com', // placeholder — replace with the real inbox
+    'email'     => 'Joostbalemans@outlook.com',
     'phone'     => '+31 6 28742487',
     'whatsapp'  => '31628742487',                     // digits only, used for wa.me links
 ];
